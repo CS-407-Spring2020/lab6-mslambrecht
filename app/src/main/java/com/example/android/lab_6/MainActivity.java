@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.security.Permissions;
 
@@ -29,7 +31,6 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         setContentView(R.layout.activity_main);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mapFragment.getMapAsync(googleMap -> {
@@ -49,6 +50,16 @@ public class MainActivity extends FragmentActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        } else {
+            mFusedLocationProviderClient.getLastLocation()
+                    .addOnCompleteListener(this, task -> {
+                        Location mLastKnownLocation = task.getResult();
+                        if (task.isSuccessful() && mLastKnownLocation != null) {
+                            mMap.addPolyline(new PolylineOptions().add(
+                                    new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()),
+                            mDestinationLatLng));
+                        }
+                    });
         }
     }
 
